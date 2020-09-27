@@ -1,3 +1,36 @@
+
+## LLCL for Pas2JS
+Delphi/FPC LLCL into Pas2JS Web/HTML
+
+use LLCL/VCL/FMX Forms in JS/Web/Mobile and Windows/Mac/Linux/Android/iOS!
+
+
+no install extra web controls!
+
+### Demo
+  see https://wintops.github.io/llcljs/llcljs.html
+
+![image](https://github.com/wintops/Atopas/blob/master/image.png)
+
+
+### Code
+
+```pascal
+uses  SysUtils, Classes, Dialogs, Controls, StdCtrls, Forms,
+ {$IFDEF PASJS}
+   WebCtrls
+ {$ELSE}
+
+  {$IFDEF FPC}LazUTF8, LCLType,{$ELSE} Variants, XPMan,{$ENDIF}
+  Graphics,    ExtCtrls,
+  ComCtrls, Menus
+{$ENDIF}
+  ;
+```
+
+
+
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/wintops/wintops.github.io/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
