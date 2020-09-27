@@ -1,15 +1,33 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LLCLJS</title>
+  <link rel="stylesheet" href="../layui/css/layui.css">
   <script src="llcljs.js"></script>
+  <script src="../layui/layui.js"></script>
 </head>
 <body>
   <script>
   window.addEventListener("load", rtl.run);
-
+  
+layui.use(['layer', 'form','jquery'], function(){
+  var $=layui.jquery, layer = layui.layer
+  ,form = layui.form;
+ console.log($('#form1').width(),$('#form1').height())
+ 
+ layer.open({
+  type: 1,
+  title :'Test',
+  area:[($('#form1').width()+20)+'px',($('#form1').height()+50)+'px'], 
+  maxmin: true,
+  scrollbar: false,
+  content: $('#form1') 
+});
+ 
+  //layer.msg('Hello World');
+});
   </script>
   <div id="pasjsconsole"></div>
 
