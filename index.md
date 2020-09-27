@@ -10,7 +10,9 @@ no install extra web controls!
 ### Demo
   see https://wintops.github.io/llcljs/llcljs.html
 
-![image](https://github.com/wintops/Atopas/blob/master/image.png)
+![image](https:///wintops.github.io/llcljs/image_llcl.png)
+
+![image](https:///wintops.github.io/llcljs/image_web.png)
 
 
 ### Code
