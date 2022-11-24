@@ -1,8 +1,8 @@
-﻿var pas = {};
+﻿var pas = { $libimports: {}};
 
 var rtl = {
 
-  version: 20000,
+  version: 20200,
 
   quiet: false,
   debug_load_units: false,
@@ -136,9 +136,9 @@ var rtl = {
       if (!module) rtl.error('rtl.run module "'+module_name+'" missing');
       rtl.loadintf(module);
       rtl.loadimpl(module);
-      if (module_name=='program'){
+      if ((module_name=='program') || (module_name=='library')){
         if (rtl.debug_load_units) rtl.debug('running $main');
-        var r = pas.program.$main();
+        var r = pas[module_name].$main();
         if (rtl.isNumber(r)) rtl.exitcode = r;
       }
     } catch(re) {
@@ -229,7 +229,10 @@ var rtl = {
   createCallback: function(scope, fn){
     var cb;
     if (typeof(fn)==='string'){
-      cb = function(){
+      if (!scope.hasOwnProperty('$events')) scope.$events = {};
+      cb = scope.$events[fn];
+      if (cb) return cb;
+      scope.$events[fn] = cb = function(){
         return scope[fn].apply(scope,arguments);
       };
     } else {
@@ -243,32 +246,38 @@ var rtl = {
   },
 
   createSafeCallback: function(scope, fn){
-    var cb = function(){
-      try{
-        if (typeof(fn)==='string'){
+    var cb;
+    if (typeof(fn)==='string'){
+      if (!scope.hasOwnProperty('$events')) scope.$events = {};
+      cb = scope.$events[fn];
+      if (cb) return cb;
+      scope.$events[fn] = cb = function(){
+        try{
           return scope[fn].apply(scope,arguments);
-        } else {
+        } catch (err) {
+          if (!rtl.handleUncaughtException(err)) throw err;
+        }
+      };
+    } else {
+      cb = function(){
+        try{
           return fn.apply(scope,arguments);
-        };
-      } catch (err) {
-        if (!rtl.handleUncaughtException(err)) throw err;
-      }
+        } catch (err) {
+          if (!rtl.handleUncaughtException(err)) throw err;
+        }
+      };
     };
     cb.scope = scope;
     cb.fn = fn;
     return cb;
   },
 
-  cloneCallback: function(cb){
-    return rtl.createCallback(cb.scope,cb.fn);
-  },
-
   eqCallback: function(a,b){
     // can be a function or a function wrapper
-    if (a==b){
+    if (a===b){
       return true;
     } else {
-      return (a!=null) && (b!=null) && (a.fn) && (a.scope===b.scope) && (a.fn==b.fn);
+      return (a!=null) && (b!=null) && (a.fn) && (a.scope===b.scope) && (a.fn===b.fn);
     }
   },
 
@@ -707,10 +716,9 @@ var rtl = {
   },
 
   intfAsIntfT: function (intf,intftype){
-    if (intf){
-      var i = rtl.getIntfG(intf.$o,intftype.$guid);
-      if (i!==null) return i;
-    }
+    if (!intf) return null;
+    var i = rtl.getIntfG(intf.$o,intftype.$guid);
+    if (i) return i;
     rtl.raiseEInvalidCast();
   },
 
@@ -739,15 +747,20 @@ var rtl = {
         delete this[id];
         old._Release(); // may fail
       }
-      this[id]=intf;
+      if(intf) {
+        this[id]=intf;
+      }
       return intf;
     },
     free: function(){
       //console.log('rtl.intfRefs.free...');
       for (var id in this){
         if (this.hasOwnProperty(id)){
-          //console.log('rtl.intfRefs.free: id='+id+' '+this[id].$name+' $o='+this[id].$o.$classname);
-          this[id]._Release();
+          var intf = this[id];
+          if (intf){
+            //console.log('rtl.intfRefs.free: id='+id+' '+intf.$name+' $o='+intf.$o.$classname);
+            intf._Release();
+          }
         }
       }
     }
@@ -1036,6 +1049,15 @@ var rtl = {
     }
   },
 
+  arrayInsert: function(item, arr, index){
+    if (arr){
+      arr.splice(index,0,item);
+      return arr;
+    } else {
+      return [item];
+    }
+  },
+
   setCharAt: function(s,index,c){
     return s.substr(0,index)+c+s.substr(index+1);
   },
@@ -1167,13 +1189,13 @@ var rtl = {
 	  // exponent width
 	  var pad = "";
 	  var ad = Math.abs(d);
-	  if (ad<1.0e+10) {
+	  if (((ad>1) && (ad<1.0e+10)) ||  ((ad>1.e-10) && (ad<1))) {
 		pad='00';
-	  } else if (ad<1.0e+100) {
+	  } else if ((ad>1) && (ad<1.0e+100) || (ad<1.e-10)) {
 		pad='0';
       }  	
 	  if (arguments.length<2) {
-	    w=9;		
+	    w=24;		
       } else if (w<9) {
 		w=9;
       }		  
@@ -1246,7 +1268,7 @@ var rtl = {
     if (rtl.debug_rtti) rtl.debug('initRTTI');
 
     // base types
-    rtl.tTypeInfo = { name: "tTypeInfo" };
+    rtl.tTypeInfo = { name: "tTypeInfo", kind: 0, $module: null, attr: null };
     function newBaseTI(name,kind,ancestor){
       if (!ancestor) ancestor = rtl.tTypeInfo;
       if (rtl.debug_rtti) rtl.debug('initRTTI.newBaseTI "'+name+'" '+kind+' ("'+ancestor.name+'")');
@@ -1289,7 +1311,7 @@ var rtl = {
     newBaseTI("tTypeInfoRefToProcVar",17 /* tkRefToProcVar */,rtl.tTypeInfoProcVar);
 
     // member kinds
-    rtl.tTypeMember = {};
+    rtl.tTypeMember = { attr: null };
     function newMember(name,kind){
       var m = Object.create(rtl.tTypeMember);
       m.name = name;
@@ -1341,11 +1363,10 @@ var rtl = {
         };
       };
     };
-    tis.addMethod = function(name,methodkind,params,result,options){
+    tis.addMethod = function(name,methodkind,params,result,flags,options){
       var t = this.$addMember(name,rtl.tTypeMemberMethod,options);
       t.methodkind = methodkind;
-      t.procsig = rtl.newTIProcSig(params);
-      t.procsig.resulttype = result?result:null;
+      t.procsig = rtl.newTIProcSig(params,result,flags);
       this.methods.push(name);
       return t;
     };
@@ -1356,7 +1377,7 @@ var rtl = {
       t.getter = getter;
       t.setter = setter;
       // Note: in options: params, stored, defaultvalue
-      if (rtl.isArray(t.params)) t.params = rtl.newTIParams(t.params);
+      t.params = rtl.isArray(t.params) ? rtl.newTIParams(t.params) : null;
       this.properties.push(name);
       if (!rtl.isString(t.stored)) t.stored = "";
       return t;
@@ -1453,8 +1474,8 @@ var rtl = {
   newTIProcSig: function(params,result,flags){
     var s = {
       params: rtl.newTIParams(params),
-      resulttype: result,
-      flags: flags
+      resulttype: result?result:null,
+      flags: flags?flags:0
     };
     return s;
   },
