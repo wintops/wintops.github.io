@@ -9,4 +9,4 @@ homepage
   
   https://wintops.github.io/llcljs/MiniCalcJS.html
 
-   https://wintops.github.io/wasmchart/
+   https://wintops.github.io/wasmchart/index.htmlindex.html
