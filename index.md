@@ -4,9 +4,21 @@
 [![screenshot](https://wintops.github.io/win32.png)](https://wintops.github.io/win32.png) 
 
 
+
+ https://wintops.github.io/dist/index.html
+
+ 
+
+
+
+  
 ## WASM Chart
 
 [![wasmchart screenshot](https://wintops.github.io/wasmchart/demo.png)](https://wintops.github.io/wasmchart/demo.png) 
+
+  https://wintops.github.io/wasmchart/index.html
+
+  https://wintops.github.io/wasmchart/mcjs.html
 
 
 ## LLCL for Pas2JS
@@ -19,6 +31,8 @@ no install extra web controls!
 
 ### Demo
   see https://wintops.github.io/llcljs/llcljs.html
+
+    https://wintops.github.io/llcljs/MiniCalcJS.html
 
 ![image](https:///wintops.github.io/llcljs/image_llcl.png)
 
