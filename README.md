@@ -15,4 +15,4 @@ homepage
 
   https://wintops.github.io/wasmchart/mcjs.html
 
-   https://wintops.github.io/2026/?410
+   https://wintops.github.io/2026/?410/000001/1
