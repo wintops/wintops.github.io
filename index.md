@@ -5,7 +5,7 @@ New Trading System Mobile/Web/Windows/Mac/Linux...
 
 https://github.com/wintops/WinTopTrader
 
-[中文](chinese.md)
+[中文](ch.md)
 
 ##  Windows Program on Web
 
