@@ -1,3 +1,11 @@
+##   WinTop Trader
+
+New Trading System Mobile/Web/Windows/Mac/Linux...
+
+
+https://github.com/wintops/WinTopTrader
+
+[中文]
 
 ##  Windows Program on Web
 
@@ -7,7 +15,7 @@
 
  https://wintops.github.io/dist/index.html
 
- 
+ https://github.com/wintops/retrotick
 
 
 
